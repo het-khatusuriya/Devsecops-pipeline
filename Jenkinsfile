@@ -1,12 +1,12 @@
 pipeline {
     agent any
     tools { 
-        maven 'maven-3.8.6' 
+        maven 'Maven' 
     }
     stages {
         stage('Checkout git') {
             steps {
-               git branch: 'main', url: 'https://github.com/praveensirvi1212/DevSecOps-project'
+               git branch: 'main', url: 'https://github.com/het-khatusuriya/Devsecops-pipeline'
             }
         }
         
@@ -20,16 +20,19 @@ pipeline {
                 }   
             }
         }
-        stage('SonarQube Analysis'){
-            steps{
-                withSonarQubeEnv('SonarQube-server') {
-                        sh 'mvn clean verify sonar:sonar \
-                        -Dsonar.projectKey=devsecops-project-key \
-                        -Dsonar.host.url=$sonarurl \
-                        -Dsonar.login=$sonarlogin'
+        stage('SonarQube Analysis') {
+            steps {
+                    withSonarQubeEnv('SonarQube-server') {
+                        withCredentials([string(credentialsId: 'devsecops', variable: 'SONAR_LOGIN')]) {
+                            sh '''
+                                mvn clean verify sonar:sonar \
+                                -Dsonar.projectKey=Devsecops-project \
+                                -Dsonar.host.url=http://localhost:9000/ \
+                                -Dsonar.login=$SONAR_LOGIN
+                            '''
+                        }
+                    }
                 }
-            }
-        }
         stage("Quality Gate") {
             steps {
               timeout(time: 1, unit: 'HOURS') {
@@ -40,8 +43,8 @@ pipeline {
         
         stage('Docker  Build') {
             steps {
-      	        sh 'docker build -t praveensirvi/sprint-boot-app:v1.$BUILD_ID .'
-                sh 'docker image tag praveensirvi/sprint-boot-app:v1.$BUILD_ID praveensirvi/sprint-boot-app:latest'
+      	        sh 'docker build -t hk2010/sprint-boot-app:v1.$BUILD_ID .'
+                sh 'docker image tag hk2010/sprint-boot-app:v1.$BUILD_ID hk2010/sprint-boot-app:latest'
             }
         }
         stage('Image Scan') {
@@ -56,18 +59,18 @@ pipeline {
          }
         stage('Docker  Push') {
             steps {
-                withVault(configuration: [skipSslVerification: true, timeout: 60, vaultCredentialId: 'vault-cred', vaultUrl: 'http://your-vault-server-ip:8200'], vaultSecrets: [[path: 'secrets/creds/docker', secretValues: [[vaultKey: 'username'], [vaultKey: 'password']]]]) {
-                    sh "docker login -u ${username} -p ${password} "
-                    sh 'docker push praveensirvi/sprint-boot-app:v1.$BUILD_ID'
-                    sh 'docker push praveensirvi/sprint-boot-app:latest'
-                    sh 'docker rmi praveensirvi/sprint-boot-app:v1.$BUILD_ID praveensirvi/sprint-boot-app:latest'
+                withVault(configuration: [skipSslVerification: true, timeout: 60, vaultCredentialId: 'vault-jenkins', vaultUrl: 'http://127.0.0.1:8200/'], vaultSecrets: [[path: 'secrets/creds/docker', secretValues: [[vaultKey: 'hk2010'], [vaultKey: 'hk2010']]]]) {
+                    sh "docker login -u hk2010 -p HK@0210@@ "
+                    sh 'docker push hk2010/sprint-boot-app:v1.$BUILD_ID'
+                    sh 'docker push hk2010/sprint-boot-app:latest'
+                    sh 'docker rmi hk2010/sprint-boot-app:v1.$BUILD_ID hk2010/sprint-boot-app:latest'
                 }
             }
         }
         stage('Deploy to k8s') {
             steps {
                 script{
-                    kubernetesDeploy configs: 'spring-boot-deployment.yaml', kubeconfigId: 'kubernetes'
+                    kubernetesDeploy configs: 'spring-boot-deployment.yaml', kubeconfigId: 'Kubernetes_jenkins'
                 }
             }
         }
@@ -85,12 +88,12 @@ def sendSlackNotifcation()
 {
     if ( currentBuild.currentResult == "SUCCESS" ) {
         buildSummary = "Job_name: ${env.JOB_NAME}\n Build_id: ${env.BUILD_ID} \n Status: *SUCCESS*\n Build_url: ${BUILD_URL}\n Job_url: ${JOB_URL} \n"
-        slackSend( channel: "#devops", token: 'slack-token', color: 'good', message: "${buildSummary}")
+        slackSend( channel: "#devsecops", token: 'eexFLADIyfWYYnHHtU9IJySP', color: 'good', message: "${buildSummary}")
     }
     else {
         buildSummary = "Job_name: ${env.JOB_NAME}\n Build_id: ${env.BUILD_ID} \n Status: *FAILURE*\n Build_url: ${BUILD_URL}\n Job_url: ${JOB_URL}\n  \n "
-        slackSend( channel: "#devops", token: 'slack-token', color : "danger", message: "${buildSummary}")
+        slackSend( channel: "#devsecops", token: 'eexFLADIyfWYYnHHtU9IJySP', color : "danger", message: "${buildSummary}")
     }
 }
 
-    
+}
