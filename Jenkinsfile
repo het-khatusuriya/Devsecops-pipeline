@@ -22,17 +22,18 @@ pipeline {
         }
         stage('SonarQube Analysis') {
             steps {
-                    withSonarQubeEnv('SonarQube-server') {
-                        withCredentials([string(credentialsId: 'devsecops', variable: 'SONAR_LOGIN')]) {
-                            sh '''
-                                mvn clean verify sonar:sonar \
-                                -Dsonar.projectKey=Devsecops-project \
-                                -Dsonar.host.url=http://localhost:9000/ \
-                                -Dsonar.login=$SONAR_LOGIN
-                            '''
-                        }
+                withSonarQubeEnv('SonarQube-server') {
+                    withCredentials([string(credentialsId: 'devsecops', variable: 'SONAR_LOGIN')]) {
+                        sh '''
+                            mvn clean verify sonar:sonar \
+                            -Dsonar.projectKey=Devsecops-project \
+                            -Dsonar.host.url=http://localhost:9000/ \
+                            -Dsonar.login=$SONAR_LOGIN
+                        '''
                     }
                 }
+            }
+        }
         stage("Quality Gate") {
             steps {
               timeout(time: 1, unit: 'HOURS') {
@@ -73,9 +74,7 @@ pipeline {
                     kubernetesDeploy configs: 'spring-boot-deployment.yaml', kubeconfigId: 'Kubernetes_jenkins'
                 }
             }
-        }
-        
- 
+        }   
     }
     post{
         always{
@@ -96,4 +95,3 @@ def sendSlackNotifcation()
     }
 }
 
-}
