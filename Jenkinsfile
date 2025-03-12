@@ -1,23 +1,27 @@
+
+
 pipeline {
     agent any
-    tools { 
-        maven 'Maven' 
+     environment {
+        KUBECONFIG = credentials('Kubernetesjenkins')
+        }
+    tools {
+        maven 'Maven'
     }
     stages {
-        stage('Checkout git') {
+        stage('Checkout Git') {
             steps {
-               git branch: 'main', url: 'https://github.com/het-khatusuriya/Devsecops-pipeline'
+                git branch: 'main', url: 'https://github.com/het-khatusuriya/Devsecops-pipeline'
             }
         }
-        
-        stage ('Build & JUnit Test') {
+        stage('Build & JUnit Test') {
             steps {
-                sh 'mvn install' 
+                sh 'mvn install'
             }
             post {
                success {
                     junit 'target/surefire-reports/**/*.xml'
-                }   
+                }  
             }
         }
         stage('SonarQube Analysis') {
@@ -34,64 +38,71 @@ pipeline {
                 }
             }
         }
-        stage("Quality Gate") {
+        stage('Docker Build') {
             steps {
-              timeout(time: 1, unit: 'HOURS') {
-                waitForQualityGate abortPipeline: true
-              }
-            }
-        }
-        
-        stage('Docker  Build') {
-            steps {
-      	        sh 'docker build -t hk2010/sprint-boot-app:v1.$BUILD_ID .'
-                sh 'docker image tag hk2010/sprint-boot-app:v1.$BUILD_ID hk2010/sprint-boot-app:latest'
+                sh "docker build -t hk2010/sprint-boot-app:v1.${BUILD_ID} ."
+                sh "docker image tag hk2010/sprint-boot-app:v1.${BUILD_ID} hk2010/sprint-boot-app:latest"
             }
         }
         stage('Image Scan') {
             steps {
-      	        sh ' trivy image --format template --template "@/usr/local/share/trivy/templates/html.tpl" -o report.html praveensirvi/sprint-boot-app:latest '
+                bat '"C:\\Program Files\\trivy_0.58.0_windows-64bit\\trivy.exe" image --format template --template "@C:\\Program Files\\trivy_0.58.0_windows-64bit\\contrib\\html.tpl" -o "E:\\SPM\\github-pipeline\\Devsecops-pipeline\\Trivy reports\\report.html" hk2010/sprint-boot-app:latest'
             }
         }
         stage('Upload Scan report to AWS S3') {
-              steps {
-                  sh 'aws s3 cp report.html s3://devsecops-project/'
-              }
-         }
-        stage('Docker  Push') {
             steps {
-                withVault(configuration: [skipSslVerification: true, timeout: 60, vaultCredentialId: 'vault-jenkins', vaultUrl: 'http://127.0.0.1:8200/'], vaultSecrets: [[path: 'secrets/creds/docker', secretValues: [[vaultKey: 'hk2010'], [vaultKey: 'hk2010']]]]) {
-                    sh "docker login -u hk2010 -p HK@0210@@ "
-                    sh 'docker push hk2010/sprint-boot-app:v1.$BUILD_ID'
-                    sh 'docker push hk2010/sprint-boot-app:latest'
-                    sh 'docker rmi hk2010/sprint-boot-app:v1.$BUILD_ID hk2010/sprint-boot-app:latest'
+                withCredentials([aws(credentialsId: 'AmazonWebServicesCredentials', accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_KEY')]) {
+                    bat '''
+                        aws configure set aws_access_key_id %AWS_ACCESS_KEY%
+                        aws configure set aws_secret_access_key %AWS_SECRET_KEY%
+                        aws s3 cp "E:\\SPM\\github-pipeline\\Devsecops-pipeline\\Trivy reports\\report.html" s3://devsecopsreport/
+                    '''
                 }
             }
-        }
+        }         
+        stage('Docker Push') {
+                steps {
+                    withCredentials([usernamePassword(credentialsId: 'dockercreds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                        sh 'echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin'
+                        sh "docker push hk2010/sprint-boot-app:v1.${BUILD_ID}"
+                        sh "docker push hk2010/sprint-boot-app:latest"
+                        sh "docker rmi hk2010/sprint-boot-app:v1.${BUILD_ID} hk2010/sprint-boot-app:latest"
+                    }
+                } 
+            }
+            
         stage('Deploy to k8s') {
             steps {
                 script{
-                    kubernetesDeploy configs: 'spring-boot-deployment.yaml', kubeconfigId: 'Kubernetes_jenkins'
+                    sh 'kubectl apply -f E:/SPM/github-pipeline/Devsecops-pipeline/spring-boot-deployment.yaml'
                 }
             }
-        }   
+        }  
+           
     }
-    post{
-        always{
-            sendSlackNotifcation()
+
+    post {
+        always {
+            script {
+                def buildSummary = """Job_name: ${env.JOB_NAME}
+                Build_id: ${env.BUILD_ID}
+                Status: *${currentBuild.currentResult}*
+                Build_url: ${env.BUILD_URL}
+                Job_url: ${env.JOB_URL}"""
+
+                def color = (currentBuild.currentResult == "SUCCESS") ? "good" : "danger"
+
+                try {
+                    slackSend(
+                        channel: "#devsecops-jenkins",
+                        tokenCredentialId: 'Slack_jenkins',
+                        color: color,
+                        message: buildSummary
+                    )
+                } catch (Exception e) {
+                    echo "Slack notification failed: ${e.message}"
+                }
             }
         }
-}
-
-    def sendSlackNotifcation()
-    {
-        if ( currentBuild.currentResult == "SUCCESS" ) {
-            buildSummary = "Job_name: ${env.JOB_NAME}\n Build_id: ${env.BUILD_ID} \n Status: *SUCCESS*\n Build_url: ${BUILD_URL}\n Job_url: ${JOB_URL} \n"
-            slackSend( channel: "#devsecops", token: 'eexFLADIyfWYYnHHtU9IJySP', color: 'good', message: "${buildSummary}")
-        }
-        else {
-            buildSummary = "Job_name: ${env.JOB_NAME}\n Build_id: ${env.BUILD_ID} \n Status: *FAILURE*\n Build_url: ${BUILD_URL}\n Job_url: ${JOB_URL}\n  \n "
-            slackSend( channel: "#devsecops", token: 'eexFLADIyfWYYnHHtU9IJySP', color : "danger", message: "${buildSummary}")
-        }
     }
-
+}
