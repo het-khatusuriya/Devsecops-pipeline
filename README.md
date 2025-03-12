@@ -122,7 +122,7 @@ This setup combines performance with security, ensuring your app goes live faste
 
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/yourusername/DevSecOps-Project.git
+   git clone https://github.com/het-khatusuriya/Devsecops-pipeline/
    ```
 
 2. **Configure Jenkins**
@@ -161,12 +161,12 @@ This setup combines performance with security, ensuring your app goes live faste
 Below are the key outputs and visual evidence of the pipeline's success:
 
 ### 🔥 AWS S3 Bucket Report Storage  
-![AWS S3 Bucket Storage](https://github.com/het-khatusuriya/Devsecops-pipeline/blob/main/outputs/aws%20s3%20bucket.png))
+![AWS S3 Bucket Storage](https://github.com/het-khatusuriya/Devsecops-pipeline/blob/main/outputs/aws%20s3%20bucket.png)
 
 ---
 
 ### 🛠️ Kubernetes Deployment - Command Line Output  
-![Kubernetes CMD Output](https://github.com/het-khatusuriya/Devsecops-pipeline/blob/main/outputs/cmd%20output%20for%20kubernetes.png))
+![Kubernetes CMD Output](https://github.com/het-khatusuriya/Devsecops-pipeline/blob/main/outputs/cmd%20output%20for%20kubernetes.png)
 
 ---
 
@@ -185,18 +185,8 @@ Below are the key outputs and visual evidence of the pipeline's success:
 
 ---
 
-### 📋 Jenkins Dashboard View  
-![Jenkins Dashboard](https://your-image-url.com/jenkins-dashboard.png "Jenkins Dashboard View")
-
----
-
-### 🛠️ Kubernetes Output with CMD  
-![Kubernetes CMD Output](https://your-image-url.com/kubernetes-output-with-cmd.png "Kubernetes CMD Output Confirmation")
-
----
-
 ### 🔄 Pipeline Changes  
-![Pipeline File Changes](https://your-image-url.com/pipeline-changes.png "Pipeline File Updates")
+![Pipeline File Changes](https://github.com/het-khatusuriya/Devsecops-pipeline/blob/main/outputs/pipeline%20changes.png)
 
 ---
 
@@ -223,6 +213,12 @@ Below are the key outputs and visual evidence of the pipeline's success:
 ### 🎉 Final Success: CI/CD Pipeline Completed  
 ![Final Pipeline Success](https://github.com/het-khatusuriya/Devsecops-pipeline/blob/main/outputs/pipeline%20sucess.png)
 
+
+---
+## 😒Errors faced till now and their solution 😑
+
+"I've attached an Excel sheet, 'Errors Report,' which tracks errors, their causes, and solutions. This is a running record of project-related problems and how they were addressed, providing a historical reference for problem-solving."
+[Project Errors and Solutions Log](https://github.com/het-khatusuriya/Devsecops-pipeline/blob/main/outputs/Errors%20Report.xlsx)
 
 ---
 
