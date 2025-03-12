@@ -1,14 +1,16 @@
 # 🚀 DevSecOps CI/CD Pipeline
 
 ## 📚 Table of Contents
-1. [Overview](#overview)
-2. [Project Goals](#project-goals)
-3. [Tools and Technologies](#tools-and-technologies)
-4. [CI/CD Pipeline Workflow](#cicd-pipeline-workflow)
-5. [Why This Pipeline?](#why-this-pipeline)
-6. [Setup Guide](#setup-guide)
-7. [Future Enhancements](#future-enhancements)
-8. [Conclusion](#conclusion)
+1. [Overview](https://github.com/het-khatusuriya/Devsecops-pipeline/tree/main?tab=readme-ov-file#-overview)
+2. [Project Goals](https://github.com/het-khatusuriya/Devsecops-pipeline/tree/main?tab=readme-ov-file#-project-goals)
+3. [Tools and Technologies](https://github.com/het-khatusuriya/Devsecops-pipeline/tree/main?tab=readme-ov-file#-tools-and-technologies)
+4. [CI/CD Pipeline Workflow](https://github.com/het-khatusuriya/Devsecops-pipeline/tree/main?tab=readme-ov-file#-cicd-pipeline-workflow)
+5. [Why This Pipeline?](https://github.com/het-khatusuriya/Devsecops-pipeline/tree/main?tab=readme-ov-file#-why-this-pipeline)
+6. [Setup Guide](https://github.com/het-khatusuriya/Devsecops-pipeline/tree/main?tab=readme-ov-file#-setup-guide)
+7. [Future Enhancements](https://github.com/het-khatusuriya/Devsecops-pipeline/tree/main?tab=readme-ov-file#-future-enhancements)
+8. [Output Showcase](http://github.com/het-khatusuriya/Devsecops-pipeline/tree/main?tab=readme-ov-file#-pipeline-output-showcase)
+9. [Project Errors and Solutions Log](https://github.com/het-khatusuriya/Devsecops-pipeline/tree/main?tab=readme-ov-file#errors-faced-till-now-and-their-solution-)
+10. [Conclusion](https://github.com/het-khatusuriya/Devsecops-pipeline/tree/main?tab=readme-ov-file#-conclusion)
 
 ---
 
